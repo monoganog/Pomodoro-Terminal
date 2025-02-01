@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+import time
+import argparse
+import sys
+import signal
+
+def signal_handler(sig, frame):
+    # Graceful exit on SIGINT (Ctrl+C)
+    print("\nExiting Pomodoro Timer. Have a productive day!")
+    sys.exit(0)
+
+# Register the SIGINT handler
+signal.signal(signal.SIGINT, signal_handler)
+
+def format_time(seconds):
+    """Convert seconds to MM:SS format."""
+    minutes = seconds // 60
+    secs = seconds % 60
+    return f"{minutes:02d}:{secs:02d}"
+
+def countdown(duration, session_type="Work"):
+    """Countdown timer that prints the remaining time."""
+    print(f"\nStarting {session_type} session for {format_time(duration)} minutes!")
+    for remaining in range(duration, 0, -1):
+        # Display the remaining time in MM:SS format
+        time_str = format_time(remaining)
+        sys.stdout.write(f"\r{session_type} Time Remaining: {time_str}")
+        sys.stdout.flush()
+        time.sleep(1)
+    sys.stdout.write(f"\r{session_type} session complete!{' ' * 20}\n")
+    sys.stdout.flush()
+
+def main():
+    parser = argparse.ArgumentParser(description="A simple Pomodoro timer for the terminal.")
+    parser.add_argument("-w", "--work", type=int, default=25,
+                        help="Duration of work session in minutes (default: 25)")
+    parser.add_argument("-r", "--rest", type=int, default=5,
+                        help="Duration of rest session in minutes (default: 5)")
+    parser.add_argument("-l", "--loops", type=int, default=1,
+                        help="Number of Pomodoro cycles (default: 1)")
+
+    args = parser.parse_args()
+
+    work_duration = args.work * 60  # convert minutes to seconds
+    rest_duration = args.rest * 60  # convert minutes to seconds
+
+    # Loop for the specified number of cycles
+    for cycle in range(1, args.loops + 1):
+        print(f"\n--- Pomodoro Cycle {cycle} ---")
+        countdown(work_duration, session_type="Work")
+        countdown(rest_duration, session_type="Rest")
+
+    print("\nAll sessions complete. Well done!")
+
+if __name__ == "__main__":
+    main()
